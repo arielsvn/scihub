@@ -1,15 +1,14 @@
-//require our dependencies
 var path = require('path');
 var webpack = require('webpack');
-var BundleTracker = require('webpack-bundle-tracker');
-var StatsPlugin = require('stats-webpack-plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var AppCachePlugin = require('appcache-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+var config = require('./webpack.config');
 
-const env = require('./env');
+var ExtractTextPlugin = require('extract-text-webpack-plugin');
 
-let devServerPort = 9001;
+const extractStyles = new ExtractTextPlugin({
+  filename: 'styles-[hash].css',
+  disable: false,
+  allChunks: true
+});
 
 module.exports = {
   //the entry point we created earlier. Note that './' means
@@ -19,39 +18,23 @@ module.exports = {
 
   output: {
     //where you want your compiled bundle to be stored
-    path: path.resolve('./docs/'),
+    path: path.resolve('../docs/'),
     //naming convention webpack should use for your files
-    filename: '[name].js',
+    filename: '[name]-[hash].js',
   },
 
-  devtool: 'source-map',
-
-  plugins: [
-    new CleanWebpackPlugin(['docs'], {root: path.resolve('..')}),
-    new AppCachePlugin({}),
-    new HtmlWebpackPlugin({
-      // Required
-      inject: false,
-      template: require('html-webpack-template'),
-      minify: {
-        removeComments: true,
-        collapseWhitespace: true,
-        preserveLineBreaks: true
-      },
-      appMountId: 'app-container',
-      links: ['https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'],
-      mobile: true,
-      title: 'Sci-Hub',
-      window: {
-        env: env
-      }
+  plugins: config.plugins.concat([
+    // css files from the extract-text-plugin loader
+    extractStyles,
+    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.optimize.UglifyJsPlugin({
+      compressor: {warnings: false},
+      sourceMap: false,
     }),
-  ],
-
-  devServer: {
-    port: devServerPort,
-    headers: {'Access-Control-Allow-Origin': '*'},
-  },
+    new webpack.DefinePlugin({
+      'process.env': {NODE_ENV: JSON.stringify('production')},
+    }),
+  ]),
 
   module: {
     loaders: [
@@ -70,13 +53,11 @@ module.exports = {
       },
       {test: /\.(jpe?g|png|gif|svg|ico)$/, loader: 'url-loader?limit=10000&name=[hash].[ext]'},
       {
-        test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
-      },
-      {
         test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader?sourceMap=1&modules=1&localIdentName=[name]__[local]--[hash:base64:3]', 'sass-loader?sourceMap=1'],
-        exclude: ['node_modules'],
+        use: extractStyles.extract({
+          fallback: 'style-loader',
+          use: ['css-loader?sourceMap=1&modules=1&localIdentName=[name]__[local]--[hash:base64:3]', 'sass-loader?sourceMap=1']
+        }),
       },
       { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=application/font-woff" },
       { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=application/font-woff" },
@@ -85,10 +66,4 @@ module.exports = {
       { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: "url-loader?limit=10000&mimetype=image/svg+xml" },
     ]
   },
-
-  resolve: {
-    // root: __dirname,
-  }
 };
-
-
