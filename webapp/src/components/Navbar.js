@@ -17,14 +17,13 @@ export default ({}, {}) => <div>
           <span className="icon-bar"/>
           <span className="icon-bar"/>
         </button>
-        <a href="#" className="navbar-brand">Sci-Hub</a>
-        <span className="navbar-text text-uppercase">(Under Heavy Development and subject to change)</span>
+        <a href="#" className="navbar-brand">Sci-Hub Stats Browser</a>
       </div>
 
       <div className="collapse navbar-collapse navbar-right">
         <ul className="nav navbar-nav">
           <li>
-            <Link to="/">Journals</Link>
+            <Link to="/journals">Journals</Link>
           </li>
           <li>
             <Link to="/publishers">Publishers</Link>
