@@ -2,11 +2,23 @@
   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
   "description": "Quantile chart",
   "mark": "line",
+  "autosize": {
+    "type": "fit",
+    "contains": "padding"
+  },
   "encoding": {
     "x": {
       "field": "quantile",
-      "type": "quantitative"
+      "type": "quantitative",
+      "axis": {
+        "title": ""
+      }
     },
     "y": {"field": "visitors", "type": "quantitative"}
+  },
+  "config": {
+    "mark": {
+      "color": "#990000"
+    }
   }
 }

@@ -1,52 +1,57 @@
-
 /* Helper functions used to fetch and pre-process data */
 
 import d3 from 'd3';
+import {format} from "./helpers";
 
-
-export function fetchJournalData() {
+export function fetchTsv({url, forEach}) {
   return new Promise((resolve, reject) => {
-    d3.tsv(env.journals_data, function(data) {
-      for (let journal of data) {
-        journal.crossref = parseFloat(journal.crossref);
-        journal.scihub = parseFloat(journal.scihub);
-        journal.coverage = parseFloat(journal.coverage);
-
-        journal.open_access = journal.open_access === '1';
-        journal.active = journal.active === '1';
+    d3.tsv(url, function(data) {
+      if (forEach) {
+        for (let row of data) {
+          forEach(row);
+        }
       }
+
       resolve(data);
     });
   });
 }
 
-export function fetchJournalCoverageChart(journalId) {
-  let path = 'https://raw.githubusercontent.com/arielsvn/scihub/a925dafebcb7ff03370969ae8480188b992cb4af/webapp/src/data/jounal-year-coverage-12001.tsv';
-  return new Promise((resolve, reject) => {
-    d3.tsv(path, function(data) {
-      resolve(data);
-    });
-  });
-}
+export const fetchJournalData = () => fetchTsv({
+  url: env.journals_data,
+  forEach: (journal) => {
+    journal.crossref = parseFloat(journal.crossref);
+    journal.scihub = parseFloat(journal.scihub);
+    journal.coverage = parseFloat(journal.coverage);
 
-export function fetchJournalQuantilesChart(journalId) {
-  let path = 'https://raw.githubusercontent.com/arielsvn/scihub/a925dafebcb7ff03370969ae8480188b992cb4af/webapp/src/data/scihub-log-journal-quantiles-12001.tsv';
-  return new Promise((resolve, reject) => {
-    d3.tsv(path, function(data) {
-      resolve(data);
-    });
-  });
-}
+    journal.open_access = journal.open_access === '1';
+    journal.active = journal.active === '1';
+  }
+});
 
-export function fetchJournalTopArticles(journalId) {
-  let path = 'https://raw.githubusercontent.com/arielsvn/scihub/a925dafebcb7ff03370969ae8480188b992cb4af/webapp/src/data/scihub-log-journal-top-articles-12001.tsv';
-  return new Promise((resolve, reject) => {
-    d3.tsv(path, function(data) {
-      resolve(data);
-    });
+export const fetchJournalInfo = (journalId) => new Promise((resolve, reject) => {
+  let url = `https://media.githubusercontent.com/media/greenelab/scihub-browser-data/master/journals/${journalId}/info-${journalId}.json`;
+  d3.json(url, function(data) {
+    resolve(data);
   });
-}
+});
 
+export const fetchJournalCoverageChart = (journalId) => fetchTsv({
+  url:`https://media.githubusercontent.com/media/greenelab/scihub-browser-data/master/journals/${journalId}/yearly-coverage-${journalId}.tsv`,
+  forEach: (row) => {
+    row.coverage = parseFloat(row.scihub)/parseFloat(row.crossref);
+
+    row.tooltip_coverage = format.percent(row.coverage)
+  }
+});
+
+export const fetchJournalQuantilesChart = (journalId) => fetchTsv({
+  url: `https://media.githubusercontent.com/media/greenelab/scihub-browser-data/master/journals/${journalId}/access-quantiles-${journalId}.tsv`,
+});
+
+export const fetchJournalTopArticles = (journalId) => fetchTsv({
+  url: `https://media.githubusercontent.com/media/greenelab/scihub-browser-data/master/journals/${journalId}/top-articles-${journalId}.tsv`,
+});
 
 export function fetchPublishersData() {
   return new Promise((resolve, reject) => {
