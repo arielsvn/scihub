@@ -7,33 +7,8 @@ import Loading from "./Loading";
 import styles from './table.scss';
 import Tooltip from './tooltip';
 
-function VoidLink(props) {
-  return <a >{props.displayName || props.columnName}</a>;
-}
 
-export default function Table(props) {
-  let columnMetadata = props.columnMetadata;
-  if (props.columnMetadata) {
-    for (let metadata of columnMetadata) {
-      if (!metadata.customHeaderComponent && (metadata.sortable === undefined || metadata.sortable!==false)) {
-        metadata.customHeaderComponent = VoidLink;
-      }
-    }
-  }
-
-  return <Griddle { ...props }
-    columnMetadata={columnMetadata}
-    sortDescendingComponent={<span className="caret"></span>}
-    sortAscendingComponent={<span className="dropup"><span className="caret"/></span>}
-    useGriddleStyles={ false } />;
-}
-
-export const LocalTable =(props) => <Table {...props} plugins={[plugins.LocalPlugin]} />;
-
-
-
-
-export const NumberCell = ({value}) => <span>{format.number(value, 0)}</span>;
+export const NumberCell = ({value, decimals = 0}) => <span>{format.number(value, decimals)}</span>;
 
 export const PercentCell = ({value}) => <span className={styles.percent}>{format.percent(value)}</span>;
 
@@ -68,15 +43,21 @@ export const rowDataSelector = (state, { griddleKey }) => {
 export class FetchDataTable extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      data: this.props.data
+    };
   }
 
   componentDidMount() {
-    this.fetchData();
+    if (!this.props.data) {
+      this.fetchData();
+    }
   }
 
   render () {
-    if (!this.state.data) {
+    if (this.state.error) {
+      return <div className="no-data">No data available.</div>;
+    } else if (!this.state.data) {
       return <Loading />
     } else {
       return <Griddle data={this.state.data}

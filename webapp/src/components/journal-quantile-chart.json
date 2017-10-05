@@ -11,10 +11,15 @@
       "field": "quantile",
       "type": "quantitative",
       "axis": {
-        "title": ""
+        "title": "",
+        "format": ".0%"
       }
     },
-    "y": {"field": "visitors", "type": "quantitative"}
+    "y": {
+      "field": "visitors",
+      "type": "quantitative",
+      "scale": {"type": "sqrt"}
+    }
   },
   "config": {
     "mark": {
