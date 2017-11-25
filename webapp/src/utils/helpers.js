@@ -50,3 +50,28 @@ export const format = {
 // thanks to https://stackoverflow.com/a/35316222/763705
 export function isString(value) {return typeof value === 'string';}
 
+export const asyncMemoize = (fn) => {
+  let value;
+  let valueCalculated = false;
+
+  return async (...args) => {
+    if (!valueCalculated) {
+      value = await fn(...args);
+      valueCalculated = true;
+    }
+
+    return value;
+  }
+};
+
+// thanks to https://gist.github.com/mathewbyrne/1280286
+export function slugify(text)
+{
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
+}
+
