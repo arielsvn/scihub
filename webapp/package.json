@@ -2,6 +2,7 @@
   "name": "webapp1",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://arielrodriguezromero.com/scihub/",
   "dependencies": {
     "bootstrap-sass": "https://github.com/arielsvn/bootstrap-sass.git",
     "d3": "^5.9.2",
